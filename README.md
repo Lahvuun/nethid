@@ -19,7 +19,7 @@ Also, here's another one from libusb/hidapi:
 
 ## Building
 
-`meson build && ninja -C build`
+`meson --buildtype=release build && ninja -C build`
 
 ## Usage
 
