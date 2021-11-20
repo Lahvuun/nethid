@@ -53,3 +53,4 @@ those files. `/dev/hidraw*` for `nethidserver` and `/dev/uhid` for
 - If multiple events are queued from the device, the server will drop all but
   the newest one to minimize input lag.
 - Version will always be 0.01. Don't know if this causes any issues.
+- Doesn't work.
