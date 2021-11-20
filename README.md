@@ -50,4 +50,6 @@ those files. `/dev/hidraw*` for `nethidserver` and `/dev/uhid` for
 - HID data from the client to the server (to the real device) won't be sent.
   This is probably for the best, since it lowers the chance of bricking your
   device, but also means stuff like force feedback likely won't work.
+- If multiple events are queued from the device, the server will drop all but
+  the newest one to minimize input lag.
 - Version will always be 0.01. Don't know if this causes any issues.

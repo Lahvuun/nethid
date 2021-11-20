@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
+#include <poll.h>
 #include <linux/hidraw.h>
 #include <linux/uhid.h>
 #include <sys/ioctl.h>
@@ -105,13 +106,42 @@ static ssize_t process_output(int fd, uint8_t *payload)
 
 static ssize_t process_get_queued_report(int fd)
 {
-	// Assuming the kernel writes the whole report at once.
-	ssize_t result = read(fd, in_buffer, in_buffer_length);
-	if (result < 1) {
+	struct pollfd fds[1];
+	fds[0].fd = fd;
+	fds[0].events = POLLIN;
+	int poll_result = -1;
+	ssize_t result = -1;
+	// Exhaust the queue.
+	do {
+		poll_result = poll(fds, 1, 0);
+		if (poll_result < 0) {
+			log_error_errno("poll", __FILE__, __LINE__);
+			return -1;
+		}
+
+		if (fds[0].revents & POLLIN) {
+			// Assuming the kernel writes the whole report at
+			// once.
+			result = read(fd, in_buffer, in_buffer_length);
+			if (result < 0) {
+				log_error("read", __FILE__, __LINE__);
+				return result;
+			}
+		} else if (poll_result) {
+			// Unhandled event.
+			log_error("poll", __FILE__, __LINE__);
+			return -1;
+		}
+	} while (poll_result);
+
+	// hidraw read() is not supposed to return 0 (I think).
+	assert(result);
+	if (result < 0) {
+		result = read(fd, in_buffer, in_buffer_length);
 		if (result < 0) {
 			log_error("read", __FILE__, __LINE__);
+			return result;
 		}
-		return result;
 	}
 
 	if (result == in_buffer_length) {
