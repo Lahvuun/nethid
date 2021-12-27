@@ -11,10 +11,12 @@ executable('nethidserver',
   'src/server/main.c',
   'src/common.c',
   c_args : args,
-  include_directories : incdir)
+  include_directories : incdir,
+  install : true)
 
 executable('nethidclient',
   'src/client/main.c',
   'src/common.c',
   c_args : args,
-  include_directories : incdir)
+  include_directories : incdir,
+  install : true)
